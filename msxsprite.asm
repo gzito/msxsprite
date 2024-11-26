@@ -23,6 +23,24 @@
 ; OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 ; SOFTWARE.
 
+; MSX ROM BASIC BIOS calls
+WRTVDP      EQU      0047H    ; write a byte to any VDP register
+RDVRM       EQU      004AH    ; read VRAM addressed using [HL]
+WRTVRM      EQU      004DH    ; write VRAM addressed using [HL]
+SETRD       EQU      0050H    ; sets up VDP for read
+SETWRT      EQU      0053H    ; sets up VDP for write
+FILVRM      EQU      0056H    ; fill VRAM with specified data
+LDIRMV      EQU      0059H    ; moves block of data from VRAM to memory
+LDIRVM      EQU      005CH    ; moves block of data from memory to VRAM
+CHGMOD      EQU      005FH    ; change screen mode of VDP to [SCRMOD]
+CHGCLR      EQU      0062H    ; change foreground, background, border color
+CALPAT      EQU      0084H    ; get address of sprite pattern table
+CALATR      EQU      0087H    ; get address of sprite attribute table
+GRPPRT      EQU      008DH    ; print a character ob the graphics screen
+CLS         EQU      00C3H    ; clear screen
+GTSTCK      EQU      00D5H    ; return status of joystick
+GTTRIG      EQU      00D8H    ; read joystick trigger button
+
 ; BIN header
       DB    0FEH     ; magic number
       DW    BEGIN    ; begin address of the program
@@ -30,7 +48,7 @@
       DW    BEGIN    ; program execution address (for ,R option)
 
       ORG   0E000H   ; The program start at E000h in the MSX's RAM
-   
+
 BEGIN:
       ; install my HTIMI hook at 0FD9FH
       DI                   ; disable interrupts, just in case this interrupt would be called while changing the hook
@@ -42,48 +60,48 @@ BEGIN:
 
       ; set screen 2
       LD    A,2
-      CALL  05FH
+      CALL  CHGMOD
 
       ; change screen colours
       LD    IX,0F3E9H
       LD    (IX),15        ; foreground white
       LD    (IX+1),1       ; background black
       LD    (IX+2),1       ; border col black
-      CALL  062H
+      CALL  CHGCLR
       
       ; clear the screen
       XOR   A
-      CALL  0C3H
+      CALL  CLS
 
        ;  uncomment the following lines to set magnified sprites
 ;      LD    C,1            ; VDP register number -> C
 ;      LD    A,(0F3E0H)     ; current VPD register 1 value
 ;      OR    1              ; set bit 0 - magnified sprites
 ;      LD    B,A            ; VDP data -> B
-;      CALL  047H           ; write VDP register
+;      CALL  WRTVDP         ; write VDP register
 
       ; get sprite pattern start addr for pattern 0
       LD    A,0
-      CALL  084H
+      CALL  CALPAT
       LD    (SPR0PT_VRAMPTR),HL
 
       ; get sprite attribute table start addr for plane 0
       LD    A,0
-      CALL  087H
+      CALL  CALATR
       LD    (SPR0AT_VRAMPTR),HL
 
       ; write sprite pattern in VRAM
       LD    HL,SPR0PT
       LD    DE,(SPR0PT_VRAMPTR)
       LD    BC,8
-      CALL  05CH
+      CALL  LDIRVM
 
       CALL  UPDATE_SPR0ATTR
 
 LOOP: 
       ; check for spacebar
       LD    A,0      ; space
-      CALL  0D8H     ; GTTRIG
+      CALL  GTTRIG   ; GTTRIG
       CP    0FFH     ; pressed?
       JR    Z,EXIT
      
@@ -96,7 +114,7 @@ LOOP:
 MOVEIT:
       ; check joy
       LD    A,0      ; cursor keys
-      CALL  0D5H     ; GTSTCK
+      CALL  GTSTCK   ; GTSTCK
       CP    3        ; right?
       JR    Z,RIGHT
       CP    7        ; left?
@@ -125,7 +143,7 @@ UPDATE_SPR0ATTR:
       LD    HL,SPR0AT
       LD    DE,(SPR0AT_VRAMPTR)
       LD    BC,4
-      CALL  05CH
+      CALL  LDIRVM
       RET
 
 EXIT: RET
