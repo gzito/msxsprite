@@ -50,7 +50,7 @@ GTTRIG      EQU      00D8H    ; read joystick trigger button
       ORG   0E000H   ; The program start at E000h in the MSX's RAM
 
 BEGIN:
-      ; install my HTIMI hook at 0FD9FH
+      ; install HTIMI hook at 0FD9FH
       DI                   ; disable interrupts, just in case this interrupt would be called while changing the hook
       LD    A,0C3H         ; JP opcode
       LD    (0FD9FH),A     ; 
@@ -81,12 +81,12 @@ BEGIN:
 ;      CALL  WRTVDP         ; write VDP register
 
       ; get sprite pattern start addr for pattern 0
-      LD    A,0
+      XOR   A
       CALL  CALPAT
       LD    (SPR0PT_VRAMPTR),HL
 
       ; get sprite attribute table start addr for plane 0
-      LD    A,0
+      XOR   A
       CALL  CALATR
       LD    (SPR0AT_VRAMPTR),HL
 
@@ -99,25 +99,20 @@ BEGIN:
       CALL  UPDATE_SPR0ATTR
 
 LOOP: 
-      ; check for spacebar
-      LD    A,0      ; space
-      CALL  GTTRIG   ; GTTRIG
-      CP    0FFH     ; pressed?
-      JR    Z,EXIT
-     
-      ; every 1/50th sec
-      LD    A,(TICKER)
-      CP    1
-      JR    NC,MOVEIT
-      JR    LOOP
+      CALL  WAIT_FOR_VBLANK
 
-MOVEIT:
+      ; check for spacebar
+      XOR   A              ; space
+      CALL  GTTRIG         ; GTTRIG
+      CP    0FFH           ; pressed?
+      JR    Z,EXIT
+
       ; check joy
-      LD    A,0      ; cursor keys
-      CALL  GTSTCK   ; GTSTCK
-      CP    3        ; right?
+      XOR   A              ; cursor keys
+      CALL  GTSTCK         ; GTSTCK
+      CP    3              ; right?
       JR    Z,RIGHT
-      CP    7        ; left?
+      CP    7              ; left?
       JR    Z,LEFT
       JR    LOOP
 
@@ -125,18 +120,23 @@ LEFT:
       LD    HL, SPR0AT+1
       DEC   (HL)
       CALL  UPDATE_SPR0ATTR
-      LD    HL,TICKER
-      LD    (HL),0
       JR    LOOP
 
 RIGHT:
       LD    HL, SPR0AT+1
       INC   (HL)
       CALL  UPDATE_SPR0ATTR
-      LD    HL,TICKER
-      LD    (HL),0
       JR    LOOP
 
+WAIT_FOR_VBLANK:
+      LD    HL,TICKER
+WAIT_FOR_VBLANK1:
+      HALT
+      LD    A,(HL)
+      CP    0        
+      JR    Z,WAIT_FOR_VBLANK1
+      LD    (HL),0
+      RET
 
 UPDATE_SPR0ATTR:
       ; write sprite attributes in VRAM
