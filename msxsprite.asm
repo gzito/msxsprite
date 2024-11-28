@@ -1,6 +1,8 @@
 ;
-; Simple sprite example for MSX written using Z80 assembly language
+; Sprite rendering sample for MSX using Z80 assembly language
+;
 ; Use cursor keys to move, space to quit
+;
 ; Assembled with sjasmplus (https://github.com/z00m128/sjasmplus)
 ;
 
@@ -118,8 +120,8 @@ MAIN_LOOP:
       LD    IX,SPR0DISP
       LD    B,0
       LD    C,A            ; 1 <= A <= 8
-      DEC   C
-      SLA   C
+      DEC   C              ; C = C - 1
+      SLA   C              ; C = C * 2
       ADD   IX,BC
 
       ; update x coord
