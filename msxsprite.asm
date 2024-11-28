@@ -1,5 +1,6 @@
 ;
 ; Simple sprite example for MSX written using Z80 assembly language
+; Use cursor keys to move, space to quit
 ; Assembled with sjasmplus (https://github.com/z00m128/sjasmplus)
 ;
 
@@ -98,48 +99,59 @@ BEGIN:
 
       CALL  UPDATE_SPR0ATTR
 
-LOOP: 
+MAIN_LOOP: 
       CALL  WAIT_FOR_VBLANK
 
-      ; check for spacebar
+      ; check for spacebar / joystick buttons
       XOR   A              ; space
       CALL  GTTRIG         ; GTTRIG
       CP    0FFH           ; pressed?
-      JR    Z,EXIT
+      JP    Z,EXIT
 
-      ; check joy
+      ; check cursor keys / joystick
       XOR   A              ; cursor keys
       CALL  GTSTCK         ; GTSTCK
-      CP    3              ; right?
-      JR    Z,RIGHT
-      CP    7              ; left?
-      JR    Z,LEFT
-      JR    LOOP
+      CP    0              ; neutral?
+      JR    Z,END_LOOP
 
-LEFT:
-      LD    HL, SPR0AT+1
-      DEC   (HL)
+      ; read stick pos and add offsets pair (SPR0DISP) to the sprite position
+      LD    IX,SPR0DISP
+      LD    B,0
+      LD    C,A            ; 1 <= A <= 8
+      DEC   C
+      SLA   C
+      ADD   IX,BC
+
+      ; update x coord
+      LD    B,(IX)
+      LD    A,(SPR0AT+1)
+      ADD   A,B
+      LD    (SPR0AT+1),A
+
+      ; update y coord
+      LD    B,(IX+1)
+      LD    A,(SPR0AT)
+      ADD   A,B
+      LD    (SPR0AT),A
+
       CALL  UPDATE_SPR0ATTR
-      JR    LOOP
 
-RIGHT:
-      LD    HL, SPR0AT+1
-      INC   (HL)
-      CALL  UPDATE_SPR0ATTR
-      JR    LOOP
+END_LOOP:
+      JP    MAIN_LOOP
 
+; Wait for VBLACK interrupt issued by the VDP
 WAIT_FOR_VBLANK:
       LD    HL,TICKER
-WAIT_FOR_VBLANK1:
+WAIT_VBLANK_LOOP:
       HALT
       LD    A,(HL)
       CP    0        
-      JR    Z,WAIT_FOR_VBLANK1
+      JR    Z,WAIT_VBLANK_LOOP
       LD    (HL),0
       RET
 
+; write sprite attributes in VRAM
 UPDATE_SPR0ATTR:
-      ; write sprite attributes in VRAM
       LD    HL,SPR0AT
       LD    DE,(SPR0AT_VRAMPTR)
       LD    BC,4
@@ -148,17 +160,24 @@ UPDATE_SPR0ATTR:
 
 EXIT: RET
 
-; sprite pattern (8 bytes)
-SPR0PT: DB    018H, 03CH, 0FFH, 099H, 099H, 0FFH, 0C3H, 0FFH
-; sprite attributes (posy, posx, plane, color)
-SPR0AT: DB    192/2, 256/2, 0, 08H
+; offset pairs to move sprite based on joystick value
+SPR0DISP:       DB 0,-1, 1,-1, 1,0, 1,1, 0,1, -1,1, -1,0, -1,-1
 
+; sprite pattern (8 bytes)
+SPR0PT:         DB    018H, 03CH, 0FFH, 099H, 099H, 0FFH, 0C3H, 0FFH
+; sprite attributes (posy, posx, plane, color)
+SPR0AT:         DB    192/2, 256/2, 0, 08H
+
+; pointer to base sprite pattern table in VRAM
 SPR0PT_VRAMPTR: DW   0
+; pointer to base sprite attribute table in VRAM
 SPR0AT_VRAMPTR: DW   0
 
+; this is set to 1 after a VBLANK is done
 TICKER:         DB   0
 
 ; my HTIMI interrupt routine
+; this is called 50 times / sec
 MYINTH:
       PUSH  HL
       LD    HL,TICKER
