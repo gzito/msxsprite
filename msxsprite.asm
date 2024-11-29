@@ -26,23 +26,7 @@
 ; OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 ; SOFTWARE.
 
-; MSX ROM BASIC BIOS calls
-WRTVDP      EQU      0047H    ; write a byte to any VDP register
-RDVRM       EQU      004AH    ; read VRAM addressed using [HL]
-WRTVRM      EQU      004DH    ; write VRAM addressed using [HL]
-SETRD       EQU      0050H    ; sets up VDP for read
-SETWRT      EQU      0053H    ; sets up VDP for write
-FILVRM      EQU      0056H    ; fill VRAM with specified data
-LDIRMV      EQU      0059H    ; moves block of data from VRAM to memory
-LDIRVM      EQU      005CH    ; moves block of data from memory to VRAM
-CHGMOD      EQU      005FH    ; change screen mode of VDP to [SCRMOD]
-CHGCLR      EQU      0062H    ; change foreground, background, border color
-CALPAT      EQU      0084H    ; get address of sprite pattern table
-CALATR      EQU      0087H    ; get address of sprite attribute table
-GRPPRT      EQU      008DH    ; print a character ob the graphics screen
-CLS         EQU      00C3H    ; clear screen
-GTSTCK      EQU      00D5H    ; return status of joystick
-GTTRIG      EQU      00D8H    ; read joystick trigger button
+      INCLUDE msx-bios.i
 
 ; BIN header
       DB    0FEH     ; magic number
