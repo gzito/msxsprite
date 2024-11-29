@@ -1,11 +1,3 @@
-;
-; Sprite rendering sample for MSX using Z80 assembly language
-;
-; Use cursor keys to move, space to quit
-;
-; Assembled with sjasmplus (https://github.com/z00m128/sjasmplus)
-;
-
 ; Copyright (c) 2024 Giovanni Zito
 ;
 ; Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -25,6 +17,14 @@
 ; LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 ; OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 ; SOFTWARE.
+
+;
+; Sprite rendering sample for MSX using Z80 assembly language
+;
+; Use cursor keys to move, space to quit
+;
+; Assembled with sjasmplus (https://github.com/z00m128/sjasmplus)
+;
 
       INCLUDE msx-bios.i
 
