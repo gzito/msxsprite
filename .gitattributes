@@ -9,4 +9,4 @@
 *.bin   binary
 *.rom   binary
 *.dsk   binary
-/AUTOEXEC.BAS text eol=crlf
+AUTOEXEC.BAS text eol=crlf
