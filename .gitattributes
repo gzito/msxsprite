@@ -1,5 +1,7 @@
+# Git decides for itself whether a file is text or binary and only normalizes textuals.
 * text=auto
 
+# overrides
 *.asm   text eol=lf
 *.i     text eol=lf
 *.sh    text eol=lf
@@ -7,3 +9,4 @@
 *.bin   binary
 *.rom   binary
 *.dsk   binary
+/AUTOEXEC.BAS text eol=crlf
