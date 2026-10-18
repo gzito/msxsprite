@@ -5,7 +5,12 @@ Use cursor keys to move, space to quit
 Assembled with sjasmplus (https://github.com/z00m128/sjasmplus)
 
 Assemble with:
-$ sjasmplus msxsprite.asm --raw=dsk/msxsprite.bin
+```
+sjasmplus msxsprite.asm --raw=dsk/msxsprite.bin
+```
 
-If you use openmsx,you can run with:
-$ openmsx -machine Philips_NMS_8250 -diska ./dsk
+If you use openmsx, you can run with:
+```
+openmsx -machine Philips_NMS_8250 -diska ./dsk
+```
+ß
