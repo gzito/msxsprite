@@ -1,0 +1,9 @@
+* text=auto
+
+*.asm   text eol=lf
+*.i     text eol=lf
+*.sh    text eol=lf
+*.bat   text eol=crlf
+*.bin   binary
+*.rom   binary
+*.dsk   binary
